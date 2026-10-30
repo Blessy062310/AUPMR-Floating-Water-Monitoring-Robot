@@ -1,0 +1,2111 @@
+/* ==========================================================================
+   SMART SUBMARINE MISSION CONTROL · ADVANCED STYLESHEET
+   Futuristic Underwater Robotics HUD with 3D Visual Effects
+   ========================================================================== */
+
+:root {
+  --bg-deep: #030b14;
+  --bg-abyss: #061524;
+  --panel: rgba(10, 29, 44, 0.82);
+  --panel-solid: #092030;
+  --panel-border: rgba(46, 124, 141, 0.35);
+  --panel-glow: rgba(53, 224, 208, 0.08);
+  --line: #1c3d52;
+  --text: #e9f6fb;
+  --text-dim: #9bb5c4;
+  --muted: #64869c;
+  
+  /* Cyberpunk Marine Palette */
+  --aqua: #35e0d0;
+  --aqua-glow: 0 0 16px rgba(53, 224, 208, 0.55);
+  --blue: #4aa5ff;
+  --blue-glow: 0 0 16px rgba(74, 165, 255, 0.5);
+  --red: #ff4767;
+  --red-glow: 0 0 18px rgba(255, 71, 103, 0.6);
+  --green: #48e59e;
+  --green-glow: 0 0 16px rgba(72, 229, 158, 0.55);
+  --amber: #ffbe53;
+  --amber-glow: 0 0 16px rgba(255, 190, 83, 0.5);
+  --violet: #b693ff;
+  
+  /* Typography */
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: 'Orbitron', -apple-system, sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  
+  /* Motion & Easing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-deep);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--font-main);
+  background: radial-gradient(circle at 50% 0%, #0c2d3e 0%, #051422 45%, var(--bg-deep) 100%);
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Background Underwater Canvas & Caustics */
+.ocean-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
+}
+
+.caustics-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 5%, rgba(53, 224, 208, 0.09) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 90%, rgba(20, 90, 125, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* App Shell Container */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 30px 30px;
+}
+
+/* Topbar Mission Control Header */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(46, 124, 141, 0.2);
+}
+
+.brand {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.brand-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(53, 224, 208, 0.6);
+  border-radius: 16px;
+  color: var(--aqua);
+  font-size: 32px;
+  background: linear-gradient(135deg, #0e3a4e, #061924);
+  box-shadow: 0 0 25px rgba(53, 224, 208, 0.22);
+}
+
+.brand-scan-ring {
+  position: absolute;
+  inset: -3px;
+  border: 1px dashed rgba(53, 224, 208, 0.4);
+  border-radius: 19px;
+  animation: rotateSlow 20s linear infinite;
+}
+
+@keyframes rotateSlow {
+  to { transform: rotate(360deg); }
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #6da2b3;
+  text-transform: uppercase;
+}
+
+.sonar-beacon {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aqua);
+  box-shadow: var(--aqua-glow);
+  display: inline-block;
+  animation: beaconPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes beaconPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.brand h1 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  margin: 4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand h1 span {
+  color: var(--aqua);
+  text-shadow: var(--aqua-glow);
+}
+
+.tag-version {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  background: rgba(53, 224, 208, 0.15);
+  border: 1px solid rgba(53, 224, 208, 0.4);
+  color: var(--aqua);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+/* Header Action Controls */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sim-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 42, 58, 0.7);
+  border: 1px solid rgba(74, 165, 255, 0.4);
+  color: #a4c9db;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.sim-btn.active {
+  background: rgba(22, 60, 84, 0.9);
+  border-color: var(--aqua);
+  color: var(--aqua);
+  box-shadow: 0 0 16px rgba(53, 224, 208, 0.25);
+}
+
+.sim-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.sim-btn.active .sim-dot {
+  background: var(--aqua);
+  box-shadow: var(--aqua-glow);
+}
+
+.connection-pill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--panel-border);
+  background: rgba(11, 32, 46, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 10px 16px;
+  color: #a8c8d8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  font-family: var(--font-mono);
+  transition: all 0.3s ease;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: var(--amber-glow);
+  animation: pulseBlink 2s infinite ease-in-out;
+}
+
+.connection-pill.connected {
+  border-color: rgba(72, 229, 158, 0.6);
+  color: #c9f6e1;
+  background: rgba(14, 46, 36, 0.85);
+}
+
+.connection-pill.connected .pulse {
+  background: var(--green);
+  box-shadow: var(--green-glow);
+}
+
+@keyframes pulseBlink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Connect & Universal Futuristic Buttons */
+.connect-btn, .secondary-btn, .toolbar-btn {
+  position: relative;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(53, 224, 208, 0.5);
+  background: linear-gradient(135deg, #103c4a, #0b2633);
+  color: var(--aqua);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.25s var(--ease-smooth);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.connect-btn::before, .secondary-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(53, 224, 208, 0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.connect-btn:hover::before, .secondary-btn:hover::before {
+  left: 100%;
+}
+
+.connect-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--aqua);
+  box-shadow: 0 6px 20px rgba(53, 224, 208, 0.35);
+  color: #ffffff;
+}
+
+.connect-btn:active {
+  transform: translateY(1px);
+}
+
+.secondary-btn {
+  border-color: rgba(74, 165, 255, 0.3);
+  background: rgba(15, 38, 53, 0.8);
+  color: #9ec5d9;
+}
+
+.secondary-btn:hover {
+  border-color: var(--blue);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(74, 165, 255, 0.25);
+}
+
+/* Interactive 3D Panels with Dynamic Glare & Hover Tilt */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.panel {
+  position: relative;
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              border-color 0.2s ease;
+  overflow: hidden;
+}
+
+/* Subtle Cursor-Following Dynamic Glare Effect */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(53, 224, 208, 0.12) 0%, transparent 65%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.tilt-card:hover::after {
+  opacity: 1;
+}
+
+.tilt-card:hover {
+  border-color: rgba(53, 224, 208, 0.5);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55),
+              0 0 28px rgba(53, 224, 208, 0.15);
+}
+
+/* Section Headings */
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.section-heading h2 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  margin: 5px 0 0;
+  letter-spacing: -0.3px;
+  color: #def2f8;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aqua);
+  box-shadow: var(--aqua-glow);
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.live-dot.thruster-dot { background: var(--blue); box-shadow: var(--blue-glow); }
+.live-dot.cam-dot { background: var(--red); box-shadow: var(--red-glow); }
+.live-dot.sensor-dot { background: var(--green); box-shadow: var(--green-glow); }
+
+.mode-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: rgba(11, 32, 46, 0.7);
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: #9cbccc;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+}
+
+.mode-tag .small-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aqua);
+  box-shadow: var(--aqua-glow);
+}
+
+/* Hero Section with Sonar Visual */
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 240px;
+  padding: 34px 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(130deg, rgba(13, 41, 58, 0.95) 0%, rgba(8, 26, 38, 0.95) 60%, rgba(6, 30, 44, 0.9) 100%);
+}
+
+.badge-num {
+  background: rgba(53, 224, 208, 0.2);
+  border: 1px solid rgba(53, 224, 208, 0.4);
+  color: var(--aqua);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.hero-copy {
+  z-index: 2;
+  max-width: 65%;
+}
+
+.hero h2 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.2vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin: 14px 0 10px;
+}
+
+.hero h2 span {
+  color: var(--aqua);
+  text-shadow: var(--aqua-glow);
+}
+
+.hero p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #94b2c4;
+  margin: 0 0 24px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 9px;
+  color: #6d90a3;
+  letter-spacing: 1.5px;
+  font-family: var(--font-mono);
+}
+
+.hero-meta strong {
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  font-family: var(--font-mono);
+  color: #d8edf5;
+}
+
+.glow-state {
+  color: var(--aqua) !important;
+}
+
+/* Radar / Sonar Artwork */
+.sonar-art {
+  width: 220px;
+  height: 220px;
+  position: absolute;
+  right: 6%;
+  top: 10px;
+  border: 1px solid rgba(53, 224, 208, 0.35);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(11, 74, 88, 0.28) 0%, rgba(6, 22, 33, 0.6) 70%, transparent 100%);
+  overflow: hidden;
+  box-shadow: inset 0 0 35px rgba(53, 224, 208, 0.12),
+              0 0 30px rgba(53, 224, 208, 0.08);
+}
+
+.sonar-grid-cross {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(53, 224, 208, 0.15) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(53, 224, 208, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center;
+}
+
+.sonar-ring {
+  position: absolute;
+  border: 1px solid rgba(53, 224, 208, 0.3);
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring1 { width: 60px; height: 60px; }
+.ring2 { width: 120px; height: 120px; }
+.ring3 { width: 180px; height: 180px; }
+
+.sonar-sweep {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  left: 50%;
+  top: 0;
+  background: linear-gradient(45deg, rgba(53, 224, 208, 0.45), transparent 75%);
+  transform-origin: bottom left;
+  animation: sweep 4.5s linear infinite;
+}
+
+@keyframes sweep {
+  to { transform: rotate(360deg); }
+}
+
+.sonar-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--aqua);
+  box-shadow: var(--aqua-glow);
+  animation: dotFlash 3s infinite ease-in-out;
+}
+
+.dot1 { left: 68%; top: 32%; width: 7px; height: 7px; }
+.dot2 { left: 35%; top: 70%; width: 5px; height: 5px; animation-delay: 1.5s; background: var(--green); }
+
+@keyframes dotFlash {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.sonar-label {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  line-height: 1.4;
+  color: #78bcc7;
+  font-family: var(--font-mono);
+}
+
+.sonar-label span {
+  color: var(--aqua);
+}
+
+/* ==========================================================================
+   INTERACTIVE 3D SUBMARINE VISUALIZATION PANEL
+   ========================================================================== */
+.sub-visual-panel {
+  position: relative;
+  min-height: 440px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+  background: radial-gradient(ellipse at 50% 60%, #0d3849 0%, #061824 65%, #030d14 100%);
+  border: 1px solid rgba(53, 224, 208, 0.4);
+  box-shadow: inset 0 0 60px rgba(6, 32, 45, 0.8),
+              0 18px 48px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
+
+.sub-visual-panel:active {
+  cursor: grabbing;
+}
+
+.sub-visual-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(53, 224, 208, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 224, 208, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+  transform: perspective(600px) rotateX(60deg) scale(2);
+  transform-origin: center bottom;
+  pointer-events: none;
+}
+
+/* Visual HUD Readout */
+.visual-hud {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.hud-box {
+  background: rgba(6, 25, 38, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(53, 224, 208, 0.25);
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hud-label {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #79aab8;
+  font-family: var(--font-mono);
+}
+
+.hud-box strong {
+  font-size: 11px;
+  color: #e5f6fa;
+  letter-spacing: 0.5px;
+}
+
+.mono-text {
+  font-family: var(--font-mono);
+  color: var(--aqua) !important;
+}
+
+/* Three.js 3D Submarine Stage */
+.sub-stage {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.three-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.three-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  outline: none;
+}
+
+/* Fallback CSS 3D Submarine */
+.submarine {
+  position: relative;
+  width: 320px;
+  height: 150px;
+  transform-style: preserve-3d;
+  transform: rotateX(-12deg) rotateY(-18deg);
+  transition: transform 0.15s ease-out;
+  filter: drop-shadow(0 25px 22px rgba(0, 0, 0, 0.65));
+}
+
+.sub-body {
+  position: absolute;
+  left: 25px;
+  top: 40px;
+  width: 260px;
+  height: 72px;
+  border-radius: 52% 42% 42% 52%;
+  background: linear-gradient(180deg, #b9d8d7, #4b8492 25%, #1f576a 60%, #0a2938);
+  border: 1px solid #7cb2ba;
+  box-shadow: inset 0 8px 12px rgba(227, 255, 255, 0.35),
+              inset 0 -12px 16px rgba(2, 12, 22, 0.85);
+  transform-style: preserve-3d;
+}
+
+.sub-nose {
+  position: absolute;
+  right: -12px;
+  top: 0;
+  width: 55px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #acd1d2, #2d6675 55%, #0b2938);
+  border-right: 1px solid #aedddd;
+}
+
+.sub-top {
+  position: absolute;
+  left: 85px;
+  top: -22px;
+  width: 65px;
+  height: 30px;
+  border-radius: 18px 18px 3px 3px;
+  background: linear-gradient(90deg, #245464, #92c0c2, #275260);
+  border: 1px solid #92c5c8;
+}
+
+.sub-window {
+  position: absolute;
+  left: 106px;
+  top: -15px;
+  width: 24px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c4ffff, #1f9db5 45%, #082130 80%);
+  border: 2px solid #c2e2e1;
+  box-shadow: 0 0 12px var(--aqua);
+  transform: translateZ(5px);
+}
+
+.sub-stripe {
+  position: absolute;
+  left: 32px;
+  right: 20px;
+  top: 23px;
+  height: 6px;
+  background: linear-gradient(90deg, #d8a75e, #ffe0a0, #bb8343);
+  transform: translateZ(3px);
+}
+
+.sub-fin {
+  position: absolute;
+  left: 48px;
+  top: -30px;
+  width: 45px;
+  height: 28px;
+  background: linear-gradient(145deg, #96b9ba, #285463);
+  border: 1px solid #8cb7bb;
+  clip-path: polygon(20% 100%, 100% 0, 100% 100%);
+}
+
+.sub-tail {
+  position: absolute;
+  left: -29px;
+  top: 18px;
+  width: 50px;
+  height: 40px;
+  background: linear-gradient(90deg, #1b3f4f, #72a1a7);
+  clip-path: polygon(100% 0, 100% 100%, 0 75%, 0 25%);
+}
+
+.sub-propeller {
+  position: absolute;
+  left: -46px;
+  top: 28px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #95bebf;
+  border: 2px solid #dcf1ee;
+  animation: subSpin 0.8s linear infinite;
+}
+
+.sub-propeller i {
+  position: absolute;
+  left: 6px;
+  top: -8px;
+  width: 4px;
+  height: 29px;
+  border-radius: 100%;
+  background: #afd4d2;
+}
+
+.sub-propeller i:nth-child(2) { transform: rotate(60deg); }
+.sub-propeller i:nth-child(3) { transform: rotate(120deg); }
+
+@keyframes subSpin {
+  to { transform: rotate(360deg); }
+}
+
+.sub-port {
+  position: absolute;
+  top: 47px;
+  left: 62px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #081d29;
+  border: 2px solid #95cace;
+  transform: translateZ(5px);
+}
+
+.sub-label {
+  position: absolute;
+  left: 105px;
+  top: 118px;
+  color: #7ebfc7;
+  font-size: 9px;
+  letter-spacing: 2px;
+  font-family: var(--font-display);
+}
+
+/* 3D Model Toolbar */
+.sub-toolbar {
+  position: absolute;
+  bottom: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.toolbar-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  background: rgba(8, 30, 44, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(53, 224, 208, 0.3);
+  color: #a4cdd9;
+  border-radius: 8px;
+}
+
+.toolbar-btn.active, .toolbar-btn:hover {
+  background: rgba(16, 52, 70, 0.9);
+  border-color: var(--aqua);
+  color: var(--aqua);
+  box-shadow: 0 0 12px rgba(53, 224, 208, 0.25);
+}
+
+.visual-caption {
+  position: relative;
+  z-index: 4;
+  padding: 10px 24px;
+  background: rgba(3, 14, 23, 0.65);
+  border-top: 1px solid rgba(53, 224, 208, 0.2);
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #7aa1b1;
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   PROPULSION CONTROLS & MOTOR TELEMETRY
+   ========================================================================== */
+.control-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 22px;
+}
+
+.drive-panel, .status-panel {
+  padding: 26px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.panel-title h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  margin: 0 0 4px;
+  color: #e5f6fa;
+}
+
+.panel-title p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(53, 224, 208, 0.35);
+  background: linear-gradient(135deg, #103b4e, #0a2636);
+  color: var(--aqua);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  box-shadow: 0 0 16px rgba(53, 224, 208, 0.15);
+}
+
+/* Directional Pad */
+.dpad {
+  max-width: 380px;
+  margin: 18px auto 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.dpad-spacer {
+  min-height: 1px;
+}
+
+.drive-btn {
+  position: relative;
+  min-height: 85px;
+  border: 1px solid rgba(46, 124, 141, 0.5);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #143e51, #0c2b3a);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-direction: column;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  overflow: hidden;
+  transition: all 0.15s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.drive-btn .arrow {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--aqua);
+  transition: transform 0.15s ease;
+}
+
+.drive-btn span:nth-child(2) {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+}
+
+.drive-btn.side-btn .arrow {
+  color: var(--blue);
+}
+
+.drive-btn.reverse .arrow {
+  color: var(--blue);
+}
+
+.btn-burst {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(53, 224, 208, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.drive-btn:hover {
+  border-color: var(--aqua);
+  box-shadow: 0 0 20px rgba(53, 224, 208, 0.25);
+  transform: translateY(-2px);
+}
+
+.drive-btn:active, .drive-btn.active {
+  transform: scale(0.96) translateY(2px);
+  border-color: var(--aqua);
+  background: linear-gradient(145deg, #1a566f, #0d3b4f);
+  box-shadow: inset 0 0 25px rgba(53, 224, 208, 0.35),
+              0 0 22px rgba(53, 224, 208, 0.4);
+}
+
+.drive-btn:active .btn-burst, .drive-btn.active .btn-burst {
+  opacity: 1;
+}
+
+.drive-btn.active .arrow {
+  transform: scale(1.2);
+}
+
+/* Stop Center Button */
+.stop-center {
+  position: relative;
+  min-height: 85px;
+  border: 1px solid rgba(255, 71, 103, 0.5);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #421c27, #26111a);
+  color: #ff91a4;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.stop-center:hover {
+  border-color: var(--red);
+  box-shadow: 0 0 22px rgba(255, 71, 103, 0.35);
+}
+
+.stop-center:active {
+  transform: scale(0.96);
+  background: #541d2d;
+}
+
+/* Speed Thrust Slider */
+.speed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.speed-header label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #9cbccc;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.speed-header strong {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--aqua);
+  text-shadow: var(--aqua-glow);
+}
+
+.speed-header small {
+  font-size: 14px;
+  margin-left: 2px;
+}
+
+.range-slider-wrapper {
+  position: relative;
+  margin: 16px 0 6px;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #113142;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid rgba(46, 124, 141, 0.4);
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 30%, var(--aqua) 70%);
+  border: 2px solid #061924;
+  box-shadow: 0 0 16px var(--aqua);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #6b8c9e;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  font-family: var(--font-mono);
+}
+
+/* Emergency Stop Button */
+.stop-btn {
+  position: relative;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid rgba(255, 71, 103, 0.6);
+  border-radius: 14px;
+  background: linear-gradient(90deg, #5c202d, #3c1622);
+  color: #ffa1b1;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  font-weight: 900;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 24px rgba(255, 71, 103, 0.15);
+}
+
+.stop-btn:hover {
+  background: linear-gradient(90deg, #752538, #4c1a29);
+  border-color: var(--red);
+  box-shadow: 0 0 26px rgba(255, 71, 103, 0.4);
+  color: #ffffff;
+}
+
+.stop-btn:active {
+  transform: scale(0.98);
+}
+
+.safety-note {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #7a9cb0;
+  margin: 14px 0 0;
+  font-family: var(--font-mono);
+}
+
+/* Motor Dynamics Status Panel */
+.status-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.motor-visual {
+  height: 130px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.motor-core {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid rgba(53, 224, 208, 0.4);
+  background: radial-gradient(circle, #184c5f, #092230);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 35px rgba(53, 224, 208, 0.15);
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.motor-core.active {
+  border-color: var(--aqua);
+  box-shadow: 0 0 40px rgba(53, 224, 208, 0.45);
+}
+
+.motor-inner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px dashed #48adb7;
+  color: var(--aqua);
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  transition: transform 0.2s linear;
+}
+
+.motor-inner.spinning {
+  animation: motorSpin 0.5s linear infinite;
+}
+
+@keyframes motorSpin {
+  to { transform: rotate(360deg); }
+}
+
+.motor-glow-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(53, 224, 208, 0.2);
+  animation: pulseRing 2s infinite ease-out;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.motor-lines {
+  position: absolute;
+  width: 85%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(53, 224, 208, 0.4), transparent);
+}
+
+.motor-rpm-tag {
+  position: absolute;
+  bottom: 4px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--aqua);
+  background: rgba(6, 25, 36, 0.85);
+  border: 1px solid rgba(53, 224, 208, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(24, 55, 72, 0.8);
+  padding: 12px 0;
+  font-size: 11px;
+  color: #92b0c2;
+}
+
+.status-row strong {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #def2f8;
+}
+
+.hud-highlight {
+  color: var(--aqua) !important;
+  font-weight: 700;
+}
+
+.safe-text {
+  color: var(--green) !important;
+}
+
+.power-track {
+  height: 6px;
+  border-radius: 99px;
+  background: #143242;
+  margin: -2px 0 12px;
+  overflow: hidden;
+  border: 1px solid rgba(53, 224, 208, 0.2);
+}
+
+.power-track div {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #1c7c88, var(--aqua));
+  box-shadow: 0 0 10px var(--aqua);
+  transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   CAMERA & OPTICAL FEED
+   ========================================================================== */
+.camera-panel {
+  padding: 20px;
+}
+
+.camera-screen {
+  position: relative;
+  min-height: 240px;
+  aspect-ratio: 16 / 8;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(46, 124, 141, 0.5);
+  border-radius: 16px;
+  background: radial-gradient(ellipse at center, #103444 0%, #030d14 78%);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+}
+
+/* Tactical Reticle & Scanlines */
+.camera-tactical-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.corner-bracket {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--aqua);
+  border-style: solid;
+  opacity: 0.65;
+}
+
+.top-left { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+.top-right { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+.bottom-left { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+.bottom-right { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
+
+.camera-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border: 1px dashed rgba(53, 224, 208, 0.4);
+  border-radius: 50%;
+}
+
+.camera-crosshair::before, .camera-crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(53, 224, 208, 0.5);
+}
+
+.camera-crosshair::before { width: 100%; height: 1px; top: 50%; left: 0; }
+.camera-crosshair::after { height: 100%; width: 1px; left: 50%; top: 0; }
+
+.camera-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--aqua), transparent);
+  box-shadow: 0 0 12px var(--aqua);
+  opacity: 0.6;
+  animation: scanLaser 4s linear infinite;
+}
+
+@keyframes scanLaser {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.camera-placeholder {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+}
+
+.camera-icon-wrapper {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.camera-icon {
+  font-size: 38px;
+  color: #4a8ca0;
+}
+
+.cam-sonar-ring {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border: 1px dashed rgba(53, 224, 208, 0.3);
+  border-radius: 50%;
+  animation: rotateSlow 15s linear infinite;
+}
+
+.camera-placeholder strong {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #def2f8;
+}
+
+.camera-placeholder span {
+  font-size: 11px;
+  color: #7fa1b3;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+.camera-screen img, .camera-screen video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  inset: 0;
+  background: #02080d;
+  z-index: 1;
+}
+
+.camera-overlay {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.cam-feed-badge {
+  display: flex;
+  align-items: center;
+  background: rgba(3, 14, 23, 0.75);
+  border: 1px solid rgba(53, 224, 208, 0.3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 8px;
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  color: #c9e6f2;
+}
+
+.rec-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  margin-right: 6px;
+  box-shadow: var(--red-glow);
+  animation: pulseBlink 1.4s infinite;
+}
+
+.cam-meta-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--aqua);
+  background: rgba(3, 14, 23, 0.75);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.cam-status-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #9cbccc;
+  background: rgba(3, 14, 23, 0.75);
+  border: 1px solid rgba(46, 124, 141, 0.4);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.camera-config {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.camera-config label {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  font-weight: 800;
+  color: #8fb1c2;
+  font-family: var(--font-mono);
+}
+
+.camera-config input {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  background: #061925;
+  border: 1px solid rgba(46, 124, 141, 0.4);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.camera-config input:focus {
+  border-color: var(--aqua);
+  box-shadow: 0 0 16px rgba(53, 224, 208, 0.25);
+}
+
+.camera-help {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #7a9cb0;
+  margin: 10px 4px 0;
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   SENSOR INSTRUMENTATION & ADVANCED GAUGES
+   ========================================================================== */
+.telemetry-heading {
+  margin-top: 6px;
+}
+
+.updated {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  color: #7998aa;
+  font-family: var(--font-mono);
+}
+
+.updated span {
+  color: var(--aqua);
+}
+
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.sensor-card {
+  position: relative;
+  padding: 20px 22px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  outline: none;
+}
+
+.sensor-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sensor-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 13px;
+  font-family: var(--font-display);
+  border: 1px solid transparent;
+}
+
+.aqua { color: var(--aqua); background: rgba(14, 57, 62, 0.85); border-color: rgba(53, 224, 208, 0.4); }
+.blue { color: var(--blue); background: rgba(16, 46, 73, 0.85); border-color: rgba(74, 165, 255, 0.4); }
+.violet { color: var(--violet); background: rgba(41, 37, 68, 0.85); border-color: rgba(182, 147, 255, 0.4); }
+.amber { color: var(--amber); background: rgba(59, 48, 32, 0.85); border-color: rgba(255, 190, 83, 0.4); }
+.green { color: var(--green); background: rgba(18, 56, 47, 0.85); border-color: rgba(72, 229, 158, 0.4); }
+.red { color: var(--red); background: rgba(59, 32, 43, 0.85); border-color: rgba(255, 71, 103, 0.4); }
+
+.sensor-state {
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: #8dafc0;
+  border: 1px solid rgba(46, 124, 141, 0.4);
+  background: rgba(6, 23, 34, 0.6);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+}
+
+.sensor-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #88a7b8;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  margin-top: 10px;
+}
+
+/* Semi-Circular SVG Gauges */
+.gauge-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0;
+}
+
+.radial-gauge {
+  width: 140px;
+  height: 70px;
+  display: block;
+}
+
+.gauge-bg {
+  stroke: rgba(20, 52, 69, 0.7);
+  stroke-linecap: round;
+}
+
+.gauge-fill {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.3s ease;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.ph-stroke { stroke: var(--aqua); color: var(--aqua); }
+.temp-stroke { stroke: var(--blue); color: var(--blue); }
+.depth-stroke { stroke: var(--violet); color: var(--violet); }
+.turbidity-stroke { stroke: var(--amber); color: var(--amber); }
+.battery-stroke { stroke: var(--green); color: var(--green); }
+
+.sensor-value {
+  font-family: var(--font-display);
+  font-size: 27px;
+  letter-spacing: -0.5px;
+  font-weight: 700;
+  margin-top: -26px;
+  text-align: center;
+  z-index: 2;
+  color: #ffffff;
+}
+
+.sensor-value small {
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #92b4c4;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
+
+.sensor-value.compact {
+  font-size: 13px;
+  letter-spacing: 1px;
+  margin: 12px 0 16px;
+  color: #b7cad4;
+  font-family: var(--font-mono);
+}
+
+/* Leak Sensor Visual Pulse Ring */
+.leak-visual-wrapper {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 12px 0;
+}
+
+.leak-ring {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 71, 103, 0.3);
+  pointer-events: none;
+}
+
+.leak-ring.alert {
+  border: 2px solid var(--red);
+  box-shadow: var(--red-glow);
+  animation: pulseBlink 0.8s infinite;
+}
+
+.sensor-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #7191a3;
+  font-size: 9px;
+  font-family: var(--font-mono);
+}
+
+.status-line {
+  height: 6px;
+  width: 6px;
+  border-radius: 50%;
+  background: var(--aqua);
+  box-shadow: var(--aqua-glow);
+}
+
+.ph-status { background: var(--aqua); box-shadow: var(--aqua-glow); }
+.temp-status { background: var(--blue); box-shadow: var(--blue-glow); }
+.depth-status { background: var(--violet); }
+.turbidity-status { background: var(--amber); box-shadow: var(--amber-glow); }
+.battery-status { background: var(--green); box-shadow: var(--green-glow); }
+.leak-status { background: var(--red); }
+
+/* Interactive Hover Tooltips */
+.sensor-tooltip {
+  position: absolute;
+  bottom: 8px;
+  left: 14px;
+  right: 14px;
+  background: rgba(3, 14, 23, 0.94);
+  border: 1px solid rgba(53, 224, 208, 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 9px;
+  line-height: 1.4;
+  color: #cde4ee;
+  font-family: var(--font-mono);
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: all 0.25s var(--ease-smooth);
+  z-index: 12;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.sensor-card:hover .sensor-tooltip,
+.sensor-card:focus .sensor-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   BOTTOM OPERATIONAL PANELS
+   ========================================================================== */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.note-panel, .log-panel {
+  padding: 26px;
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid rgba(24, 55, 72, 0.8);
+  font-size: 11px;
+  color: #a9c6d4;
+  line-height: 1.5;
+}
+
+.checklist li span {
+  color: var(--aqua);
+  font-size: 10px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  padding-top: 1px;
+}
+
+.event-log {
+  margin-top: 16px;
+  max-height: 170px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(53, 224, 208, 0.3) rgba(6, 23, 34, 0.5);
+}
+
+.log-entry {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(24, 55, 72, 0.8);
+  font-size: 11px;
+  color: #abc9d8;
+  line-height: 1.5;
+  font-family: var(--font-mono);
+}
+
+.log-time {
+  color: #4eb5c2;
+  min-width: 58px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 4px 0;
+  color: #55798e;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  font-family: var(--font-mono);
+}
+
+/* Notification Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 25px);
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(14, 38, 52, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(53, 224, 208, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6),
+              0 0 20px rgba(53, 224, 208, 0.25);
+  border-radius: 12px;
+  padding: 13px 22px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: #e9f7fc;
+  transition: all 0.25s var(--ease-smooth);
+  z-index: 1000;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ==========================================================================
+   MOBILE & TOUCH-SCREEN OPTIMIZATION SUITE
+   Touch ergonomics, minimum 44px tap targets, orientation modes
+   ========================================================================== */
+
+/* Universal touch optimization */
+button, input, select, .drive-btn, .stop-center, .sensor-card {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.drive-btn, .stop-center, .stop-btn {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Touch-specific overrides: avoid sticky hover states on smartphones */
+@media (hover: none) {
+  .tilt-card:hover {
+    transform: none !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+    border-color: var(--panel-border) !important;
+  }
+  .tilt-card::after {
+    display: none !important;
+  }
+  .sensor-card .sensor-tooltip {
+    display: none; /* Tooltip on hover is not needed on touch */
+  }
+}
+
+/* Tablet & Medium Screen Devices */
+@media (max-width: 900px) {
+  .app-shell { 
+    padding: 16px 14px 24px; 
+  }
+  .control-grid, .bottom-grid { 
+    grid-template-columns: 1fr; 
+    gap: 16px;
+  }
+  .sensor-grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px;
+  }
+  .hero { 
+    padding: 24px 20px; 
+    min-height: auto;
+  }
+  .hero-copy { 
+    max-width: 78%; 
+  }
+  .sonar-art { 
+    right: -25px; 
+    opacity: 0.35; 
+  }
+  .visual-hud { 
+    flex-direction: row; 
+    flex-wrap: wrap;
+    gap: 8px; 
+  }
+  .hud-box {
+    padding: 6px 10px;
+  }
+}
+
+/* Smartphone Portrait Screens (<= 640px) */
+@media (max-width: 640px) {
+  .app-shell { 
+    padding: 12px 10px 20px; 
+  }
+  
+  /* Topbar mobile stack */
+  .topbar { 
+    flex-direction: column; 
+    align-items: stretch; 
+    gap: 16px; 
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+  
+  .brand {
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+  }
+  .brand h1 {
+    font-size: 16px;
+  }
+  
+  .header-actions { 
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .header-actions .sim-btn,
+  .header-actions .connection-pill,
+  .header-actions .connect-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px; /* Apple/Google recommended touch target */
+    font-size: 11px;
+  }
+  
+  /* Hero section mobile */
+  .hero {
+    padding: 20px 16px;
+  }
+  .hero-copy { 
+    max-width: 100%; 
+  }
+  .hero h2 { 
+    font-size: 26px; 
+    letter-spacing: -0.5px;
+  }
+  .hero p {
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
+  .hero-meta {
+    gap: 16px;
+  }
+  .sonar-art { 
+    display: none; /* Hide decorative background sonar on small screens */
+  }
+  
+  /* 3D Model Stage on Mobile */
+  .sub-visual-panel { 
+    min-height: 360px; 
+    touch-action: pan-y; /* Allows vertical scrolling past 3D model smoothly */
+  }
+  .sub-stage { 
+    height: 300px; 
+  }
+  .visual-hud {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .hud-box {
+    padding: 5px 8px;
+    border-radius: 8px;
+  }
+  .hud-label {
+    font-size: 7px;
+  }
+  .hud-box strong {
+    font-size: 10px;
+  }
+  .sub-toolbar {
+    bottom: 34px;
+    width: calc(100% - 24px);
+    justify-content: center;
+    gap: 6px;
+  }
+  .toolbar-btn {
+    padding: 0 8px;
+    font-size: 7.5px;
+    min-height: 34px;
+  }
+  .visual-caption {
+    padding: 8px 12px;
+    font-size: 8px;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  /* Propulsion & D-Pad */
+  .drive-panel, .status-panel {
+    padding: 18px 14px;
+  }
+  .dpad { 
+    max-width: 100%; 
+    gap: 8px; 
+    margin: 14px 0;
+  }
+  .drive-btn { 
+    min-height: 80px; /* Large finger friendly */
+  }
+  .drive-btn .arrow {
+    font-size: 28px;
+  }
+  .stop-center {
+    min-height: 80px;
+    font-size: 12px;
+  }
+  .stop-btn {
+    min-height: 48px;
+    font-size: 12px;
+  }
+  
+  /* Sensor instrumentation */
+  .sensor-grid { 
+    grid-template-columns: 1fr; /* Single column card stack for easy glance */
+    gap: 12px;
+  }
+  .sensor-card {
+    min-height: 160px;
+    padding: 16px 18px;
+  }
+  .radial-gauge {
+    width: 130px;
+    height: 65px;
+  }
+  .sensor-value {
+    font-size: 24px;
+    margin-top: -24px;
+  }
+
+  /* Camera controls */
+  .camera-panel {
+    padding: 14px 12px;
+  }
+  .camera-screen {
+    min-height: 200px;
+  }
+  .camera-config { 
+    grid-template-columns: 1fr 1fr; 
+    gap: 8px;
+  }
+  .camera-config label, 
+  .camera-config input { 
+    grid-column: 1 / -1; 
+  }
+  .camera-config .connect-btn,
+  .camera-config .secondary-btn {
+    min-height: 44px;
+  }
+  
+  .note-panel, .log-panel {
+    padding: 18px 14px;
+  }
+  footer { 
+    flex-direction: column; 
+    gap: 6px; 
+    font-size: 8px;
+    text-align: center;
+  }
+}
+
+/* Extra Small Phones (< 360px) */
+@media (max-width: 360px) {
+  .drive-btn { min-height: 70px; }
+  .dpad { gap: 5px; }
+  .hero h2 { font-size: 22px; }
+}
+
+/* Mobile Landscape Optimization (Gamepad / Controller Mode) */
+@media (orientation: landscape) and (max-height: 550px) {
+  .app-shell {
+    padding: 10px 14px;
+  }
+  .hero {
+    min-height: auto;
+    padding: 16px;
+  }
+  .control-grid {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+  .sub-stage {
+    height: 260px;
+  }
+}
+
+/* Reduced Motion Mode for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .sub-propeller { animation: none !important; }
+}

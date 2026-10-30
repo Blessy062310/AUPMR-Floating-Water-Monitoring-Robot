@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#030c14">
+  <title>Smart Submarine | Advanced Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <!-- Three.js for Cinematic 3D Underwater Submarine Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <!-- Underwater Ambient Background with Light Rays & Marine Particles -->
+  <canvas id="oceanCanvas" class="ocean-canvas" aria-hidden="true"></canvas>
+  <div class="caustics-overlay" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <!-- Top Mission Control Header -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <span class="brand-icon">≈</span>
+          <span class="brand-scan-ring"></span>
+        </div>
+        <div>
+          <div class="eyebrow"><span class="sonar-beacon"></span> Autonomous Underwater Pollution Monitoring Robot</div>
+          <h1>SMART<span>SUBMARINE</span> <span class="tag-version">MK-IV</span></h1>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Interactive Demo / Hardware Mode Switch -->
+        <button id="simModeButton" class="secondary-btn sim-btn" type="button" title="Test all gauges and 3D animations without ESP32 connected">
+          <span class="sim-dot"></span><span id="simModeText">SIMULATION: OFF</span>
+        </button>
+
+        <div class="connection-pill" id="connectionPill">
+          <span class="pulse"></span>
+          <span id="connectionText">BLUETOOTH DISCONNECTED</span>
+        </div>
+
+        <button id="connectButton" class="connect-btn" type="button">
+          <span class="btn-glow"></span>
+          <span class="btn-text">CONNECT BLUETOOTH</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero / Mission Banner -->
+      <section class="hero panel tilt-card" data-tilt-max="4">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="badge-num">SYS-01</span> TELEMETRY & PROPULSION</div>
+          <h2>Explore below<br><span>the abyssal surface.</span></h2>
+          <p>Real-time vehicle hydrodynamics, environmental sensor suite, and wireless thruster telemetry.</p>
+          <div class="hero-meta">
+            <div class="meta-item">
+              <span class="meta-label">PROPULSION STATE</span>
+              <strong id="systemState" class="glow-state">STANDBY</strong>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">COMMUNICATION LINK</span>
+              <strong id="ipAddress" class="glow-state">192.168.4.1</strong>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">VESSEL PROTOCOL</span>
+              <strong class="glow-state">BLE · UART NORDIC</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="sonar-art" aria-hidden="true">
+          <div class="sonar-ring ring1"></div>
+          <div class="sonar-ring ring2"></div>
+          <div class="sonar-ring ring3"></div>
+          <div class="sonar-grid-cross"></div>
+          <div class="sonar-sweep"></div>
+          <div class="sonar-dot dot1"></div>
+          <div class="sonar-dot dot2"></div>
+          <div class="sonar-label">ACTIVE SONAR<br><span>360° PINGING</span></div>
+        </div>
+      </section>
+
+      <!-- 3D Submarine Interactive Visualization -->
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow"><span class="live-dot"></span> ROBOT VIEW & HULL ATTITUDE</div>
+          <h2>Interactive 3D Submarine Visualization</h2>
+        </div>
+        <div class="mode-tag sub-controls-hint">
+          <span class="small-dot"></span> MOVE CURSOR TO TILT · DRAG TO INSPECT 360°
+        </div>
+      </div>
+
+      <section class="panel sub-visual-panel" id="subVisual">
+        <!-- Sci-Fi HUD Overlay Elements -->
+        <div class="visual-hud">
+          <div class="hud-box">
+            <span class="hud-label">VEHICLE CLASSIFICATION</span>
+            <strong>SS · EXPLORER MK-IV</strong>
+          </div>
+          <div class="hud-box">
+            <span class="hud-label">ATTITUDE (PITCH / YAW)</span>
+            <strong id="attitudeText" class="mono-text">0° / 0°</strong>
+          </div>
+          <div class="hud-box">
+            <span class="hud-label">THRUSTER STATUS</span>
+            <strong id="hudThrusterText" class="mono-text">IDLE · 0 RPM</strong>
+          </div>
+        </div>
+
+        <!-- 3D Stage / Three.js Container -->
+        <div class="sub-stage" id="subStage">
+          <!-- WebGL Canvas will be injected here by Three.js -->
+          <div id="threeCanvasContainer" class="three-container"></div>
+
+          <!-- Fallback CSS Submarine (active if WebGL is unsupported) -->
+          <div class="submarine" id="submarineModel" role="img" aria-label="Interactive 3D submarine model">
+            <div class="sub-body">
+              <div class="sub-nose"></div>
+              <div class="sub-top"></div>
+              <div class="sub-window"></div>
+              <div class="sub-stripe"></div>
+              <div class="sub-fin"></div>
+              <div class="sub-tail"></div>
+              <div class="sub-propeller"><i></i><i></i><i></i></div>
+              <div class="sub-port"></div>
+            </div>
+            <div class="sub-label">SS EXPLORER</div>
+          </div>
+        </div>
+
+        <!-- 3D Interactive Controls Toolbar -->
+        <div class="sub-toolbar">
+          <button id="resetSubViewBtn" class="toolbar-btn" type="button" title="Center camera angle">⟲ RESET ORIENTATION</button>
+          <button id="toggleLightsBtn" class="toolbar-btn active" type="button" title="Toggle submarine searchlights">☼ SEARCHLIGHTS</button>
+          <button id="autoRotateSubBtn" class="toolbar-btn" type="button" title="Toggle continuous inspection turntable">↻ AUTO ROTATE</button>
+        </div>
+
+        <div class="visual-caption">
+          <span>INTERACTIVE TACTICAL 3D TWIN</span>
+          <span>CURVATURE & DEPTH SIMULATOR ACTIVE</span>
+        </div>
+      </section>
+
+      <!-- Propulsion & Motor Control -->
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow"><span class="live-dot thruster-dot"></span> PROPULSION CONTROL UNIT</div>
+          <h2>Motor & Directional Thrust</h2>
+        </div>
+        <div class="mode-tag"><span class="small-dot"></span> HOLD BUTTON TO RUN · RELEASING STOPS</div>
+      </div>
+
+      <section class="control-grid">
+        <!-- Directional Pad & Power Slider -->
+        <div class="panel drive-panel tilt-card">
+          <div class="panel-title">
+            <span class="icon">⌁</span>
+            <div>
+              <h3>Directional Thrust Control</h3>
+              <p>Touch or click and hold directional buttons to fire motors</p>
+            </div>
+          </div>
+
+          <div class="direction-pad dpad">
+            <span class="dpad-spacer"></span>
+            <button class="drive-btn forward" data-direction="forward" type="button">
+              <span class="arrow">↑</span>
+              <span>FORWARD</span>
+              <span class="btn-burst"></span>
+            </button>
+            <span class="dpad-spacer"></span>
+
+            <button class="drive-btn side-btn" data-direction="left" type="button">
+              <span class="arrow">←</span>
+              <span>PORT (L)</span>
+              <span class="btn-burst"></span>
+            </button>
+
+            <button class="stop-center" id="centerStopButton" type="button">
+              <span class="stop-glow"></span>
+              <span>STOP</span>
+            </button>
+
+            <button class="drive-btn side-btn" data-direction="right" type="button">
+              <span class="arrow">→</span>
+              <span>STBD (R)</span>
+              <span class="btn-burst"></span>
+            </button>
+
+            <span class="dpad-spacer"></span>
+            <button class="drive-btn reverse" data-direction="reverse" type="button">
+              <span class="arrow">↓</span>
+              <span>REVERSE</span>
+              <span class="btn-burst"></span>
+            </button>
+            <span class="dpad-spacer"></span>
+          </div>
+
+          <!-- Speed Thrust Power Slider -->
+          <div class="speed-header">
+            <label for="speedSlider">THRUST POWER OUTPUT</label>
+            <strong><span id="speedValue">35</span><small>%</small></strong>
+          </div>
+          <div class="range-slider-wrapper">
+            <input id="speedSlider" type="range" min="0" max="100" value="35">
+            <div class="slider-fill" id="sliderFillBar"></div>
+          </div>
+          <div class="range-labels">
+            <span>0% (STANDBY)</span>
+            <span>50% (CRUISE)</span>
+            <span>100% (MAX THRUST)</span>
+          </div>
+
+          <!-- Emergency Stop Button -->
+          <button class="stop-btn" id="stopButton" type="button">
+            <span class="stop-icon">■</span>
+            <span>EMERGENCY ALL-STOP</span>
+            <span class="btn-danger-glow"></span>
+          </button>
+          <p class="safety-note">Safety Lock: Releasing cursor sends immediate stop packet. Guard propeller from foreign debris.</p>
+        </div>
+
+        <!-- Live Propulsion Status Panel -->
+        <div class="panel status-panel tilt-card">
+          <div class="panel-title">
+            <span class="icon">◉</span>
+            <div>
+              <h3>Motor Dynamics</h3>
+              <p>Active driver output & safety heartbeat</p>
+            </div>
+          </div>
+
+          <div class="motor-visual">
+            <div class="motor-core" id="motorCoreVisual">
+              <div class="motor-inner" id="motorInnerSpin">M</div>
+              <div class="motor-glow-ring"></div>
+            </div>
+            <div class="motor-lines"></div>
+            <div class="motor-rpm-tag" id="motorRpmTag">0 RPM</div>
+          </div>
+
+          <div class="status-row">
+            <span>Commanded Vector</span>
+            <strong id="directionValue" class="hud-highlight">STOPPED</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Power Output Level</span>
+            <strong id="powerValue">0%</strong>
+          </div>
+
+          <div class="power-track">
+            <div id="powerBar"></div>
+          </div>
+
+          <div class="status-row">
+            <span>Failsafe Heartbeat</span>
+            <strong class="safe-text">1200 ms (ACTIVE)</strong>
+          </div>
+
+          <div class="status-row">
+            <span>Controller State</span>
+            <strong id="controllerState" class="hud-state-offline">OFFLINE</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vision & Camera Stream Section -->
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow"><span class="live-dot cam-dot"></span> OPTICAL SENSOR</div>
+          <h2>Live Hull Camera Feed</h2>
+        </div>
+        <div class="mode-tag"><span class="small-dot"></span> MJPEG / RTSP / WEBCAM STREAM</div>
+      </div>
+
+      <section class="panel camera-panel tilt-card">
+        <div class="camera-screen" id="cameraScreen">
+          <!-- Tactical Sci-Fi Reticle Overlay -->
+          <div class="camera-tactical-hud" aria-hidden="true">
+            <div class="corner-bracket top-left"></div>
+            <div class="corner-bracket top-right"></div>
+            <div class="corner-bracket bottom-left"></div>
+            <div class="corner-bracket bottom-right"></div>
+            <div class="camera-crosshair"></div>
+            <div class="camera-scanline"></div>
+            <div class="camera-grid-lines"></div>
+          </div>
+
+          <!-- Placeholder when no stream is connected -->
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            <div class="camera-icon-wrapper">
+              <span class="camera-icon">▣</span>
+              <span class="cam-sonar-ring"></span>
+            </div>
+            <strong>NO ACTIVE CAMERA SOURCE</strong>
+            <span>Enter a reachable HTTP/HTTPS MJPEG or MP4/WebM video stream URL below to initiate optics.</span>
+          </div>
+
+          <!-- Video & Image Display Elements -->
+          <img id="cameraImage" alt="Live submarine camera feed" hidden>
+          <video id="cameraVideo" autoplay muted playsinline controls hidden></video>
+
+          <!-- Status Bar on Top of Camera -->
+          <div class="camera-overlay">
+            <span class="cam-feed-badge"><i class="rec-dot"></i> <span id="recStatusText">LIVE FEED</span></span>
+            <span class="cam-meta-tag" id="cameraTimestamp">00:00:00</span>
+            <span id="cameraStatus" class="cam-status-pill">WAITING FOR SOURCE</span>
+          </div>
+        </div>
+
+        <!-- Camera Controls & Inputs -->
+        <div class="camera-config">
+          <label for="cameraUrl">STREAM URL</label>
+          <input id="cameraUrl" type="url" placeholder="http://192.168.4.1/stream or video url">
+          <button id="cameraConnect" class="connect-btn" type="button">LOAD FEED</button>
+          <button id="cameraClear" class="secondary-btn" type="button">CLEAR</button>
+          <button id="cameraSampleBtn" class="secondary-btn" type="button" title="Load sample oceanic test feed">TEST DEMO</button>
+        </div>
+        <p class="camera-help">Compatible with ESP32-CAM MJPEG streams, local IP webcams, or video files over network.</p>
+      </section>
+
+      <!-- Onboard Instruments & Sensor Suite -->
+      <div class="section-heading telemetry-heading">
+        <div>
+          <div class="eyebrow"><span class="live-dot sensor-dot"></span> SENSOR SUITE</div>
+          <h2>Live Onboard Telemetry</h2>
+        </div>
+        <div class="updated">TELEMETRY SYNC: <span id="lastUpdated" class="mono-text">--:--:--</span></div>
+      </div>
+
+      <section class="sensor-grid">
+        <!-- Sensor 1: Water pH -->
+        <article class="panel sensor-card tilt-card" data-sensor="ph" tabindex="0">
+          <div class="sensor-top">
+            <span class="sensor-icon aqua">pH</span>
+            <span class="sensor-state" id="phState">LIVE</span>
+          </div>
+          <div class="sensor-label">WATER pH LEVEL</div>
+          
+          <div class="gauge-container">
+            <svg class="radial-gauge" viewBox="0 0 120 70">
+              <path class="gauge-bg" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" />
+              <path class="gauge-fill ph-stroke" id="phGaugePath" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" stroke-dasharray="142" stroke-dashoffset="71" />
+            </svg>
+            <div class="sensor-value" id="phValue">--<small> pH</small></div>
+          </div>
+
+          <div class="sensor-foot">
+            <span id="phVoltage">-- V input</span>
+            <span class="status-line ph-status"></span>
+          </div>
+          <div class="sensor-tooltip">Ideal Freshwater: 6.5 - 8.5 pH. Measures galvanic potential.</div>
+        </article>
+
+        <!-- Sensor 2: Temperature -->
+        <article class="panel sensor-card tilt-card" data-sensor="temp" tabindex="0">
+          <div class="sensor-top">
+            <span class="sensor-icon blue">℃</span>
+            <span class="sensor-state" id="tempState">WAITING</span>
+          </div>
+          <div class="sensor-label">WATER TEMPERATURE</div>
+          
+          <div class="gauge-container">
+            <svg class="radial-gauge" viewBox="0 0 120 70">
+              <path class="gauge-bg" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" />
+              <path class="gauge-fill temp-stroke" id="tempGaugePath" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" stroke-dasharray="142" stroke-dashoffset="142" />
+            </svg>
+            <div class="sensor-value" id="tempValue">--<small> °C</small></div>
+          </div>
+
+          <div class="sensor-foot">
+            <span>DS18B20 digital probe</span>
+            <span class="status-line temp-status"></span>
+          </div>
+          <div class="sensor-tooltip">Submersible 1-Wire temperature sensor inside stainless probe.</div>
+        </article>
+
+        <!-- Sensor 3: Depth -->
+        <article class="panel sensor-card tilt-card" data-sensor="depth" tabindex="0">
+          <div class="sensor-top">
+            <span class="sensor-icon violet">↧</span>
+            <span class="sensor-state" id="depthState">SETUP</span>
+          </div>
+          <div class="sensor-label">SUBMERSIBLE DEPTH</div>
+          
+          <div class="gauge-container">
+            <svg class="radial-gauge" viewBox="0 0 120 70">
+              <path class="gauge-bg" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" />
+              <path class="gauge-fill depth-stroke" id="depthGaugePath" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" stroke-dasharray="142" stroke-dashoffset="142" />
+            </svg>
+            <div class="sensor-value" id="depthValue">--<small> m</small></div>
+          </div>
+
+          <div class="sensor-foot">
+            <span id="depthPressureLabel">Hydrostatic sensor</span>
+            <span class="status-line depth-status"></span>
+          </div>
+          <div class="sensor-tooltip">Calibrated piezoresistive pressure transducer.</div>
+        </article>
+
+        <!-- Sensor 4: Turbidity -->
+        <article class="panel sensor-card tilt-card" data-sensor="turbidity" tabindex="0">
+          <div class="sensor-top">
+            <span class="sensor-icon amber">≈</span>
+            <span class="sensor-state" id="turbidityState">LIVE</span>
+          </div>
+          <div class="sensor-label">WATER TURBIDITY / CLARITY</div>
+          
+          <div class="gauge-container">
+            <svg class="radial-gauge" viewBox="0 0 120 70">
+              <path class="gauge-bg" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" />
+              <path class="gauge-fill turbidity-stroke" id="turbidityGaugePath" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" stroke-dasharray="142" stroke-dashoffset="142" />
+            </svg>
+            <div class="sensor-value" id="turbidityValue">--<small> V</small></div>
+          </div>
+
+          <div class="sensor-foot">
+            <span>Optical refraction (Voltage)</span>
+            <span class="status-line turbidity-status"></span>
+          </div>
+          <div class="sensor-tooltip">Higher Voltage = Cleaner Water. Lower Voltage = Higher Suspended Solids.</div>
+        </article>
+
+        <!-- Sensor 5: Battery Voltage -->
+        <article class="panel sensor-card tilt-card" data-sensor="battery" tabindex="0">
+          <div class="sensor-top">
+            <span class="sensor-icon green">ϟ</span>
+            <span class="sensor-state" id="batteryState">SETUP</span>
+          </div>
+          <div class="sensor-label">BATTERY POWER CELL</div>
+          
+          <div class="gauge-container">
+            <svg class="radial-gauge" viewBox="0 0 120 70">
+              <path class="gauge-bg" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" />
+              <path class="gauge-fill battery-stroke" id="batteryGaugePath" d="M 15,65 A 45,45 0 0,1 105,65" fill="none" stroke-width="10" stroke-dasharray="142" stroke-dashoffset="142" />
+            </svg>
+            <div class="sensor-value" id="batteryValue">--<small> V</small></div>
+          </div>
+
+          <div class="sensor-foot">
+            <span id="batteryPercentLabel">LiPo pack voltage</span>
+            <span class="status-line battery-status"></span>
+          </div>
+          <div class="sensor-tooltip">3S LiPo Safe Window: 11.1V to 12.6V. Low cut-off: 10.5V.</div>
+        </article>
+
+        <!-- Sensor 6: Leak Detection -->
+        <article class="panel sensor-card tilt-card" data-sensor="leak" tabindex="0">
+          <div class="sensor-top">
+            <span class="sensor-icon red">!</span>
+            <span class="sensor-state" id="leakState">SETUP</span>
+          </div>
+          <div class="sensor-label">HULL INTEGRITY / LEAK</div>
+          
+          <div class="leak-visual-wrapper">
+            <div class="leak-ring" id="leakPulseRing"></div>
+            <div class="sensor-value compact" id="leakValue">NOT CONFIGURED</div>
+          </div>
+
+          <div class="sensor-foot">
+            <span>Hull Bilge Conductive Probes</span>
+            <span class="status-line leak-status"></span>
+          </div>
+          <div class="sensor-tooltip">Triggers emergency thruster shutdown if moisture enters electronics chamber.</div>
+        </article>
+      </section>
+
+      <!-- Bottom Operational Log & Pre-Dive Checklist -->
+      <section class="bottom-grid">
+        <div class="panel note-panel tilt-card">
+          <div class="panel-title">
+            <span class="icon">i</span>
+            <div>
+              <h3>Pre-Dive Operations Checklist</h3>
+              <p>Mandatory security inspection before subsea immersion</p>
+            </div>
+          </div>
+          <ul class="checklist">
+            <li><span>01</span> Test propeller direction with the submarine safely secured.</li>
+            <li><span>02</span> Calibrate pH and turbidity probes with clean baseline reference.</li>
+            <li><span>03</span> Verify silicone O-ring seals, acrylic dome, and bilge moisture sensor.</li>
+            <li><span>04</span> Maintain tether line or ensure surface antenna stays unshielded.</li>
+          </ul>
+        </div>
+
+        <div class="panel log-panel tilt-card">
+          <div class="panel-title">
+            <span class="icon">⌗</span>
+            <div>
+              <h3>Mission Command Event Log</h3>
+              <p>Real-time telemetry and controller events</p>
+            </div>
+          </div>
+          <div id="eventLog" class="event-log">
+            <div class="log-entry">
+              <span class="log-time">BOOT</span>
+              <span>Subsea Mission Control initialized. Awaiting ESP32 Bluetooth link…</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mission Control Footer -->
+    <footer>
+      <span>SMART SUBMARINE CONTROL CENTER · MK-IV ADVANCED ROBOTICS</span>
+      <span>ESP32 BLE GATT · THREE.JS VISUAL ENGINE</span>
+    </footer>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast" role="status"></div>
+
+  <!-- Main JavaScript Engine -->
+  <script src="./script.js"></script>
+</body>
+</html>
